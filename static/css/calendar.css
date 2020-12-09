@@ -1,0 +1,93 @@
+body {
+    padding-bottom: 0px;
+    padding-top: 50px;
+}
+
+#calendar-wrapper {
+    max-height: calc(100vh - 50px);
+    overflow-y: hidden;
+}
+
+#sidebar-container {
+    height: calc(100vh - 50px);
+    overflow-y: scroll;
+}
+
+#data-panel {
+    height: calc(100vh - 50px);
+    overflow-y: scroll;
+}
+
+#todays-appoinment {
+    margin-top: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+#todays-appoinment table {
+    margin-top: 20px;
+}
+#todays-appoinment thead tr {
+    background: var(--primary-light-2);
+}
+#todays-appoinment tbody tr {
+    background: white;
+}
+
+
+#calendar-container {
+    margin-top: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+#calendar-container #month-display {
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+#calendar-container #month-display h5 {
+    margin: 0px;
+}
+
+#calendar-container table {
+    margin-top: 15px;
+}
+
+#calendar-container thead tr {
+    background: rgba(220,53,69,0.4)!important;
+}
+#calendar-container thead th {
+    text-align: center;
+}
+
+#calendar-container .badge {
+    margin-left: 5px;
+}
+
+#calendar-container .badge:hover{
+    cursor: pointer;
+}
+
+#calendar-container tbody tr {
+    background: white;
+}
+
+.modal-body {
+    padding: 10px;
+    background: rgb(219,226,237);
+}
+.modal-close-button {
+    border: 0px;
+    background: transparent;
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 0px 10px 10px 10px;
+    font-size: 22px;
+    color: #d43939;
+}
+
+.modal-close-button:hover{
+    cursor: pointer;
+}

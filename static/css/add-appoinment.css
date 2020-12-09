@@ -1,0 +1,62 @@
+body {
+    padding-bottom: 0px;
+    padding-top: 50px;
+}
+
+#sidebar-container, #dashboard-wrapper {
+    height: calc(100vh - 50px);
+    overflow-y: hidden;
+}
+
+#data-panel {
+    height: calc(100vh - 50px);
+    overflow-y: scroll;
+}
+
+.form-container {
+    background: var(--form-bg);
+}
+
+.dentist-container > div {
+    border: 0.5px solid var(--primary-color);
+    padding-top: 10px;
+    padding-bottom: 10px
+}
+
+.badge-container .badge {
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.badge-container .badge:hover {
+    cursor: pointer;
+}
+
+.badge.available{
+    /* color: #fff; */
+    background-color: rgb(186, 227, 170);
+}
+
+.badge.busy{
+    /* color: #fff; */
+    background-color: rgb(208, 213, 217);
+    text-decoration: line-through;
+}
+
+.modal-body {
+    padding: 10px;
+    background: rgb(219,226,237);
+}
+.modal-close-button {
+    border: 0px;
+    background: transparent;
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 0px 10px 10px 10px;
+    font-size: 22px;
+    color: #d43939;
+}
+.modal-close-button:hover {
+    cursor: pointer;
+}

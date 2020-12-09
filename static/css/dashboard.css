@@ -1,0 +1,14 @@
+body {
+    padding-bottom: 0px;
+    padding-top: 50px;
+}
+
+#dashboard-wrapper {
+    max-height: calc(100vh - 50px);
+    overflow-y: hidden;
+}
+
+#sidebar-container {
+    height: calc(100vh - 50px);
+    overflow-y: scroll;
+}
