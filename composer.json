@@ -1,0 +1,8 @@
+{
+    "require": {
+        "morrislaptop/firestore-php": "^2.2",
+        "google/cloud-firestore": "^1.19",
+      "ext-json": "*",
+      "ext-calendar": "*"
+    }
+}

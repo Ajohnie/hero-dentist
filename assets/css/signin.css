@@ -1,0 +1,20 @@
+#signin-panel {
+    background-color: var(--form-bg);
+    margin-top: 20px;
+    padding: 30px 100px;
+}
+
+#signin-panel h4 {
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+#signin-panel button[type=submit] {
+    margin-bottom: 15px;
+}
+
+#signin-panel p, #signin-panel p * {
+    font-size: 12px;
+    color: var(--primary-color)!important;
+}

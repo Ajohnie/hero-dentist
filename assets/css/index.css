@@ -1,0 +1,15 @@
+#intro-container {
+    height: 80vh;
+    display: flex;
+    align-items: center;
+}
+
+#features-container {
+    height: 80vh;
+}
+
+#features-container > div > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}

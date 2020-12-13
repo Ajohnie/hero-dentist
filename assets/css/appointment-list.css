@@ -1,0 +1,29 @@
+body {
+    padding-bottom: 0px;
+    padding-top: 50px;
+}
+
+#sidebar-container, #dashboard-wrapper {
+    height: calc(100vh - 50px);
+    overflow-y: hidden;
+}
+
+#data-panel {
+    height: calc(100vh - 50px);
+    overflow-y: scroll;
+}
+
+#list-container {
+    background: var(--form-bg);
+}
+
+#list-container td, #list-container th {
+    text-align: center;
+} 
+
+#list-container thead tr {
+    background: var(--primary-light-2);
+}
+#list-container tbody tr {
+    background: white;
+}
