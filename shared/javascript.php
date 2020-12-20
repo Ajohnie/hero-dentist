@@ -12,7 +12,7 @@
     $(window).on('load', function () {
         getTableListData();
         fillFormWithCachedData('theForm');
-        showAppointmentSchedule('schedule');
+        searchAppointments(null, null, 'schedule');
     });
     $(window).on('beforeunload', function () {
         // clear data when leaving add forms and reset edit mode
@@ -165,6 +165,19 @@
                     options.push(selectedOptions[index].value);
                 }
                 formData[fieldId] = JSON.stringify(options);
+            } else if (input.type === 'radio') {
+                // this means that there are multiple elements with same id and name
+                // we have to loop through each and get corresponding value
+                let radioValue = 'No';
+                const radioButtons = document.getElementsByName(fieldId);
+                for (let index = 0; index < radioButtons.length; index++) {
+                    const radioButton = radioButtons.item(index);
+                    if (radioButton.checked) {
+                        radioValue = radioButton.value;
+                        break;
+                    }
+                }
+                formData[fieldId] = radioValue;
             } else {
                 formData[fieldId] = input.value;
             }
@@ -296,6 +309,7 @@
         if (!progressNotes) {
             return;
         }
+
         // fill in the radio buttons
         setFormFields(formFields, progressNotes);
         // fill in the diagnose test table
@@ -316,19 +330,57 @@
             'Palpation',
             'ProbeDptLoc',
             'Mobility',
-            'SpecialTests'];
-        for (let testIndex = 0; testIndex < diagnoseTests.length; testIndex++) {
+            'SpecialTests'
+        ];
+        const getRow = (rowName) => {
+            for (let index = 0; index < rows.length; index++) {
+                const row = rows.item(index);
+                if (row.className === rowName) {
+                    return row;
+                }
+            }
+            return null;
+        }
+        // use this variable to add columns even when there data is not available
+        let maximumNoOfColumns = 0;
+        for (let nameIndex = 0; nameIndex < rowNames.length; nameIndex++) {
+            const rowName = rowNames[nameIndex];
+            const row = getRow(rowName);
+            if (!row) {
+                continue;
+            }
+
             // formData is now test
-            const test = diagnoseTests[testIndex];
-            for (let nameIndex = 0; nameIndex < rowNames.length; nameIndex++) {
-                const rowName = rowNames[nameIndex];
-                const row = rows.namedItem(rowName);
-                // remove the default columns
-                row.deleteCell(1);
-                row.deleteCell(2);
-                const testValue = test[rowName];
-                const child = `<input type="text" name="${rowName}[${testIndex}]" id="${rowName}" value="${testValue}" class="form-control row">`;
-                row.insertCell(testIndex).innerHTML = child;
+            const tests = diagnoseTests[rowName];
+            if (!tests) {
+                continue;
+            }
+
+            // update maximum no of columns to length of test data
+            // previous test had for example [0], current test has [0,1]
+            // to set maximum no of columns to 2 from 1
+            if (maximumNoOfColumns < tests.length) {
+                maximumNoOfColumns = tests.length;
+            }
+            for (let testIndex = 0; testIndex < maximumNoOfColumns; testIndex++) {
+                let testValue = tests[testIndex];
+                if (!testValue) {
+                    testValue = '';
+                }
+                // add 1 to skip the header row
+                const column = row.cells[testIndex + 1];
+                let input;
+                if (column) {
+                    input = column.children[0];
+                }
+
+                if (input) {
+                    input.name = `${rowName}[${testIndex}]`;
+                    input.id = `${rowName}`;
+                    input.value = testValue;
+                } else {
+                    row.insertCell(testIndex + 1).innerHTML = `<input type="text" name="${rowName}[${testIndex}]" id="${rowName}" value="${testValue}" class="form-control testInput">`;
+                }
             }
         }
     }
@@ -388,8 +440,6 @@
                 if (!value) {
                     continue; // database field not set
                 }
-
-
                 // element is a select option e.g in add dentist
                 // get all selected option
                 if (element.options) {
@@ -398,8 +448,24 @@
                         const option = options[index];
                         option.selected = optionIsAmongValues(option.value, value);
                     }
+                } else if (element.type === 'radio') {
+                    // this means that there are multiple elements with same id and name
+                    // we have to loop through each and set corresponding value
+                    const radioButtons = document.getElementsByName(fieldId);
+                    for (let index = 0; index < radioButtons.length; index++) {
+                        const radioButton = radioButtons.item(index);
+                        // set radio buttons for progress note
+                        if (value.toLowerCase() === 'yes' && radioButton.value.toLowerCase() === 'yes') {
+                            radioButton.checked = true;
+                        }
+
+                        if (value.toLowerCase() === 'no' && radioButton.value.toLowerCase() === 'no') {
+                            radioButton.checked = true;
+                        }
+                    }
                 } else {
                     element.setAttribute('value', value);
+                    element.value = value;
                 }
             }
         }
@@ -499,8 +565,7 @@
         }
     }
 
-    /** show schedule when you navigate to add-appointment*/
-    function showAppointmentSchedule(divId) {
+    function searchAppointments(dentistName, date, divId) {
         const scheduleDiv = document.getElementById(divId);
         if (!scheduleDiv) {
             return;
@@ -510,15 +575,71 @@
                 return;
             }
             try {
-                const html = response;
+                const dentistSelect = document.getElementById('dentistSelect');
+                const html = JSON.parse(response);
                 if (html) {
-                    scheduleDiv.innerHTML = html;
+                    scheduleDiv.innerHTML = html['appointments'];
+                    dentistSelect.innerHTML = html['names'];
                 }
             } catch (e) {
                 logError(e);
             }
         };
-        makeAjaxRequest(controllerUrl, {view: 'schedule'}, drawCallback);
+        const data = {view: 'schedule'}
+        if (!dentistName) {
+            data['DentistName'] = dentistName;
+        }
+        const searchDate = document.getElementById('searchDate');
+        if (searchDate) {
+            data['searchDate'] = searchDate.getAttribute('date');
+        }
+        if (date) {
+            data['AppointmentDate'] = date;
+            // when date filter is applied, change current displayed date to that date
+            searchDate.setAttribute('date', date);
+            const newDate = new Date(date);
+            searchDate.innerHTML = newDate.toDateString();
+        }
+        makeAjaxRequest(controllerUrl, data, drawCallback);
+    }
+
+    /** hide all div elements without specified dentist name*/
+    function filterAppointmentsByDentist(event) {
+        const appointmentElements = document.getElementsByClassName('dentist-container');
+        if (!appointmentElements) {
+            return;
+        }
+        const dentistName = event.target.value;
+        if (!dentistName) {
+            return;
+        }
+        if (dentistName === 'All-Dentists') {
+            for (let index = 0; index < appointmentElements.length; index++) {
+                // un hide any previously hidden elements
+                appointmentElements[index].style.display = 'block';
+            }
+            return;
+        }
+        for (let index = 0; index < appointmentElements.length; index++) {
+            const element = appointmentElements[index];
+            const elementId = element.id;
+            if (!elementId) {
+                continue;
+            }
+            if (dentistName !== elementId) {
+                element.style.display = 'none';
+            } else {
+                element.style.display = 'block';
+            }
+        }
+    }
+
+    /** show schedule when you navigate to add-appointment*/
+    function showAppointmentSchedule() {
+        event.preventDefault();
+        const searchDate = document.getElementById('appointmentDate');
+        const dentistName = document.getElementById('dentistSelect');
+        searchAppointments(dentistName.value, searchDate.value, 'schedule')
     }
 
     function showTimeSlot() {
@@ -534,6 +655,11 @@
             reserveBtn.on('click', function () {
                 const PatientNo = document.getElementById('PatientNo').value;
                 const data = {view: 'addAppointment', PatientNo: PatientNo, Time: Time, DentistName: DentistName};
+                // current appointment date
+                const searchDate = document.getElementById('searchDate');
+                if (searchDate) {
+                    data['appointmentDate'] = searchDate.getAttribute('date');
+                }
                 makeAjaxRequest(controllerUrl, data);
             });
             $("#DentistNameReserve").html(DentistName);

@@ -43,7 +43,8 @@ function addAppointmentToDatabase($dentistName, $patientName, $phoneNo, $date, $
         'PatientName' => $patientName,
         'PatientNo' => $phoneNo,
         'AppointmentDate' => $date,
-        'AppointmentTime' => $time];
+        'AppointmentTime' => $time
+    ];
     $appObject = getAppointmentObject($data);
     $appObject = setAppointmentId($appObject);
     $appointmentSaved = saveRecord(APPOINTMENTS_COLLECTION, $appObject, true);
@@ -182,12 +183,19 @@ function isAppointmentDataValid($dentistName, $patientName, $phoneNo, $date, $ti
  * foreach dentist read their schedule then find
  * all appointments whose AppointmentTime is equal to the schedule time
  * extract hour field from time value and compare it with dentist time
+ * @param null $date
+ * @return array
  */
-function getSchedule()
+function getSchedule($date = null)
 {
-    $appointments = getAppointments();
+    if ($date) {
+        $query = ['param' => 'AppointmentDate', 'operator' => '==', 'value' => $date];
+    } else {
+        $query = [];
+    }
+    $appointments = getAppointments($query);
     if (count($appointments) === 0) {
-        return [];
+        return getDefaultSchedule();
     }
     $dentists = getDentists();
     if (count($dentists) === 0) {
@@ -199,6 +207,27 @@ function getSchedule()
         $schedule = [
             'name' => $dentist['name'],
             'slots' => getSlots($dentist, $appointments)
+        ];
+        $schedules[] = $schedule;
+    }
+    return $schedules;
+}
+
+function getDefaultSchedule()
+{
+    $dentists = getDentists();
+    if (count($dentists) === 0) {
+        return [];
+    }
+    $schedules = []; // ['name'=>'', slots=>['time'=>'','status']];
+    foreach ($dentists as $dentist) {
+        $_defSlots = [];
+        foreach ($dentist['slots'] as $slot) {
+            $_defSlots[] = ['time' => $slot, 'status' => 'available', 'FirebaseId' => ''];
+        }
+        $schedule = [
+            'name' => $dentist['name'],
+            'slots' => $_defSlots
         ];
         $schedules[] = $schedule;
     }

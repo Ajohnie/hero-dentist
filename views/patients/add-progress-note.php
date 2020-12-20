@@ -49,26 +49,34 @@
                 </div>
                 <div class="row" id="form-container">
                     <form action="<?= PATIENTS_CONTROLLER ?>" id="theForm" class="w-100"
-                          formFields="PatientName,PatientNo,DOB,FirebaseId,Restoration,Crown,Discolouration,OpenApex,Carries,Perforation,Note">
+                          formFields="FileNumber,PatientName,PatientNo,DOB,FirebaseId,Restoration,Crown,Discolouration,OpenApex,Caries,Perforation,Note">
                         <?php include FIREBASE_ID_INPUT ?>
                         <div class="row justify-content-center">
-                            <div class="col-4">
+                            <div class="col-2">
                                 <div class="form-group">
-                                    <label class="row">Name</label>
-                                    <input type="text" name="PatientName" id="PatientName" class="form-control row">
+                                    <label class="row">File Number</label>
+                                    <input type="text" name="FileNumber" id="FileNumber" class="form-control row"
+                                           required>
                                 </div>
                             </div>
-                            <div class="col-3 mr-4">
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label class="row">Name</label>
+                                    <input type="text" name="PatientName" id="PatientName" class="form-control row"
+                                           required>
+                                </div>
+                            </div>
+                            <div class="col-3 mr-1">
                                 <div class="form-group row">
                                     <label class="col-3">Phone</label>
-                                    <input type="number" id="PatientNo" name="PatientNo" class="form-control">
+                                    <input type="number" id="PatientNo" name="PatientNo" class="form-control" required>
                                 </div>
                             </div>
                             <div class="col-3">
                                 <div class="form-group row">
                                     <label class="col-12">Date of Birth</label>
                                     <input type="date" name="DOB" id="DOB"
-                                           class="form-control">
+                                           class="form-control" required>
                                 </div>
                             </div>
                         </div>
@@ -79,23 +87,26 @@
                                     <div class="row justify-content-around">
                                         <label class="float-left">Restoration</label>
                                         <label class="radio-inline" style="margin-left: 2.8rem">
-                                            <input type="radio" name="Restoration" id="Restoration" value="Yes">Yes</label>
+                                            <input type="radio" name="Restoration" id="Restoration" value="Yes"
+                                                   required>Yes</label>
                                         <label class="radio-inline">
-                                            <input type="radio" name="Restoration" id="Restoration" value="No">No</label>
+                                            <input type="radio" name="Restoration" id="Restoration" value="No" required>No</label>
                                     </div>
                                     <div class="row justify-content-around">
                                         <label class="float-left mr-5">Crown</label>
                                         <label class="radio-inline" style="margin-left: 1.8rem">
-                                            <input type="radio" name="Crown"  id="Crown" value="Yes">Yes</label>
+                                            <input type="radio" name="Crown" id="Crown" value="Yes" required>Yes</label>
                                         <label class="radio-inline"><input type="radio" name="Crown" id="Crown"
-                                                                           value="No">No</label>
+                                                                           value="No" required>No</label>
                                     </div>
                                     <div class="row justify-content-around">
                                         <label class="float-left">Discolouration</label>
                                         <label class="radio-inline ml-4">
-                                            <input type="radio" name="Discolouration" id="Discolouration" value="Yes">Yes</label>
+                                            <input type="radio" name="Discolouration" id="Discolouration" value="Yes"
+                                                   required>Yes</label>
                                         <label class="radio-inline">
-                                            <input type="radio" name="Discolouration" id="Discolouration" value="No">No</label>
+                                            <input type="radio" name="Discolouration" id="Discolouration" value="No"
+                                                   required>No</label>
                                     </div>
                                 </fieldset>
                                 <fieldset class="mt-5">
@@ -104,22 +115,26 @@
                                     <div class="row justify-content-around">
                                         <label class="float-left">Open Apex</label>
                                         <label class="radio-inline" style="margin-left: 1.8rem">
-                                            <input type="radio" name="OpenApex" id="OpenApex" value="Yes">Yes</label>
+                                            <input type="radio" name="OpenApex" id="OpenApex" value="Yes"
+                                                   required>Yes</label>
                                         <label class="radio-inline"><input type="radio" name="OpenApex" id="OpenApex"
-                                                                           value="No">No</label>
+                                                                           value="No" required>No</label>
                                     </div>
                                     <div class="row justify-content-around">
                                         <label class="float-left mr-5">Caries</label>
                                         <label class="radio-inline" style="margin-left: 0.8rem">
-                                            <input type="radio" name="Caries" id="Caries" value="Yes">Yes</label>
-                                        <label class="radio-inline"><input type="radio" name="Caries" id="Caries"
-                                                                           value="No">No</label>
+                                            <input type="radio" name="Caries" id="Caries" value="Yes"
+                                                   required>Yes</label>
+                                        <label class="radio-inline">
+                                            <input type="radio" name="Caries" id="Caries" value="No" required>No</label>
                                     </div>
                                     <div class="row justify-content-around">
                                         <label class="float-left">Perforation</label>
                                         <label class="radio-inline" style="margin-left: 1.8rem">
-                                            <input type="radio" name="Perforation" id="Perforation" value="Yes">Yes</label>
-                                        <label class="radio-inline"><input type="radio" name="Perforation" value="No">No</label>
+                                            <input type="radio" name="Perforation" id="Perforation" value="Yes"
+                                                   required>Yes</label>
+                                        <label class="radio-inline"><input type="radio" name="Perforation" value="No"
+                                                                           required>No</label>
                                     </div>
                                 </fieldset>
                             </div>

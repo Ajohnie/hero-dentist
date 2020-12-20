@@ -22,7 +22,7 @@ function addAppointment()
         $dentistName = getRequestData('DentistName');
         $patientName = getRequestData('PatientName');
         $phoneNo = getRequestData('PhoneNo');
-        $date = getRequestData('•AppointmentDate');
+        $date = getRequestData('AppointmentDate');
         $time = getRequestData('AppointmentTime');
         $result = addAppointmentToDatabase($dentistName, $patientName, $phoneNo, $date, $time);
         if ($result['result']) {
@@ -77,7 +77,18 @@ function viewAppointments()
     $viewAppointment = getRequestData('view', 'string', 'post');
     // make sure request is for appointment-list not progress-note-list
     if ($viewAppointment === 'view') {
-        $appointments = getAppointments();
+        $year = getRequestData('year');
+        $month = getRequestData('month');
+        $day = getRequestData('day');
+        $query = [];
+
+        $searchDate = getRequestData('searchDate');
+        if ($year && $month && $day) {
+            $query = ['param' => 'AppointmentDate', 'operator' => '==', 'value' => $year . '-' . $month . '-' . $day];
+        } elseif ($searchDate) {
+            $query = ['param' => 'AppointmentDate', 'operator' => '==', 'value' => $searchDate];
+        }
+        $appointments = getAppointments($query);
         $tableRows = '';
         foreach ($appointments as $appointment) {
             $rowData = json_encode($appointment);
@@ -120,20 +131,40 @@ function viewAppointmentSchedule()
     $viewAppointment = getRequestData('view', 'string', 'post');
     // make sure request is for appointment schedule
     if ($viewAppointment === 'schedule') {
+
+        $year = getRequestData('year');
+        $month = getRequestData('month');
+        $day = getRequestData('day');
+        $query = null;
+        // this is set by the date filter on add-appointment.php and sent via ajax
+        $appointmentDate = getRequestData('AppointmentDate');
+        $searchDate = getRequestData('searchDate');
+        if ($appointmentDate) {
+            $searchDate = $appointmentDate;
+        }
+        if ($year && $month && $day) {
+            $query = $year . '-' . $month . '-' . $day;
+        } elseif ($searchDate) {
+            $query = $searchDate;
+        }
         // get schedule from model and display it
-        $schedules = getSchedule();
+        $schedules = getSchedule($query);
         if (count($schedules) === 0) {
             return null;
         }
         $html = '';
+        $names = '<option value="All-Dentists">All-Dentists</option>';
         foreach ($schedules as $schedule) {
-            $html .= '<div class="row dentist-container mb-3"><div class="col-10 offset-1"><h5>' . $schedule['name'] . '</h5><div class="badge-container">';
+            $names .= '<option value="' . $schedule['name'] . '">' . $schedule['name'] . '</option>>';
+            // id attribute will be used by dentist filter to hide other dentists
+            // and leave only those with id= dentist name
+            $html .= '<div class="row dentist-container mb-3" id="' . $schedule['name'] . '"><div class="col-10 offset-1"><h5>' . $schedule['name'] . '</h5><div class="badge-container">';
             foreach ($schedule['slots'] as $slot) {
                 $html .= '<span onclick="showTimeSlot()"' . ' DentistName="' . $schedule['name'] . '"Time="' . $slot['time'] . '" FirebaseId="' . $slot['FirebaseId'] . '" status="' . $slot['status'] . '" class="badge ' . $slot['status'] . '" data-toggle="use-js-instead" data-target="using-js' . ($slot['status'] == 'busy' ? 'appointmentDetailsModal' : 'addAppointmentModal') . '">' . $slot['time'] . '</span>';
             }
             $html .= '</div></div></div>';
         }
-        echo $html;
+        echo json_encode(['appointments' => $html, 'names' => $names]);
     }
     if ($viewAppointment === 'showAppointment') {
         $firebaseId = getRequestData('FirebaseId', 'string', 'post');
@@ -149,11 +180,14 @@ function viewAppointmentSchedule()
         ]);
     }
     if ($viewAppointment === 'addAppointment') {
-        // PatientNo: PatientNo, Time: Time, DentistName: DentistName
+        // PatientNo: PatientNo, Time: Time, DentistName: DentistName, appointmentDate
         $phoneNo = getRequestData('PatientNo', 'string', 'post');
         $time = getRequestData('Time', 'string', 'post');
         $dentistName = getRequestData('DentistName', 'string', 'post');
-        $date = getDefaultDate();
+        $date = getRequestData('appointmentDate', 'string', 'post');
+        if (!$date) {
+            $date = getDefaultDate();
+        }
         $appointment = getAppointments(['param' => 'PatientNo', 'operator' => '==', 'value' => $phoneNo], true);
         if (count($appointment) > 0) {
             $patientName = $appointment['PatientName'];

@@ -59,7 +59,7 @@ function addPatientToDatabase($fileNumber, $name, $phoneNo, $dateOfBirth, $progr
  * @param $phoneNo
  * @param $dateOfBirth
  * @param $firebaseId
- * @param $progressNotes
+ * @param array $progressNotes
  * @return array
  */
 function editPatientInDatabase($fileNumber, $name, $phoneNo, $dateOfBirth, $firebaseId, $progressNotes = null)
@@ -85,12 +85,13 @@ function editPatientInDatabase($fileNumber, $name, $phoneNo, $dateOfBirth, $fire
     $data['PatientName'] = $name;
     $data['PatientNo'] = $phoneNo;
     $data['DOB'] = $dateOfBirth;
+
     if ($progressNotes) {
         $data['ProgressNotes'] = $progressNotes;
     }
     $appObject = getAppointmentObject($data);
     $appObject = setAppointmentId($appObject);
-
+    //['result' => false, 'message' => '']
     $patientSaved = saveRecord(PATIENTS_COLLECTION, $appObject, false);
     if ($patientSaved) {
         $result['message'] = "Patient Saved Successfully";
@@ -193,16 +194,20 @@ function getPatientNote($patientRecord)
     }
     // set supported date format for date input(yyyy-mm-dd)
     $patientRecord['AppointmentDate'] = getNiceDate($date, 'Y-m-t');
-    logMessage($progressNotes['Note']);
+
     // set value for date column to format Dec 31, 2021
     $date = getNiceDate($date);
     return [
         'PatientName' => $patientRecord['PatientName'],
         'DentistName' => $patientRecord['DentistName'],
+        'PatientNo' => $patientRecord['PatientNo'],
+        'FileNumber' => $patientRecord['FileNumber'],
+        'DOB' => $patientRecord['DOB'],
         'Date' => $date,
         'Note' => $progressNotes['Note'],
         'AppointmentDate' => $patientRecord['AppointmentDate'],
         'FirebaseId' => $patientRecord['FirebaseId'],
+        'ProgressNotes' => $progressNotes,
     ];
 }
 

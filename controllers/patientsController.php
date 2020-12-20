@@ -128,9 +128,9 @@ function viewPatients()
 
             // show user if progress note has been set
             if (isset($patientData['ProgressNotes']) && count($patientData['ProgressNotes'])) {
-                $progressNoteAvailable = '(N)';
+                $progressNoteAvailable = ''; // there are no notes, remove view link
             } else {
-                $progressNoteAvailable = '';
+                $progressNoteAvailable = 'display:none';
             }
 
             $tableRows .= "<tr><td>" . $fileNumber . "</td>
@@ -139,7 +139,7 @@ function viewPatients()
                     <td>" . $dob . "</td>
                     <td>
                     <span><a href='#' class='progress-note' id='addNote' onclick='$addNoteAction'>Add</a></span>
-                    <span><a href='#' class='progress-note' id='viewNote' onclick='$viewNoteAction'>View $progressNoteAvailable</a></span>
+                    <span><a href='#' class='progress-note' id='viewNote' onclick='$viewNoteAction' style='$progressNoteAvailable'>View</a></span>
                      </td>
                      <td><span class='fa fa-pencil-square-o text-success' id='edit' onclick='$editAction'></span>
                        <span class='fa fa-remove text-danger' id='delete' onclick='$deleteAction'></span>
@@ -198,7 +198,6 @@ function viewPatientNotes()
 function addPatientNotes()
 {
     $addNote = getRequestData('add', 'string', 'post');
-    logMessage($addNote);
     if ($addNote === 'addNote') {
         $progressNotes = getProgressNotes();
         $fileNumber = getRequestData('FileNumber');
@@ -229,18 +228,18 @@ function getProgressNotes()
         'Crown' => $crown,
         'Discolouration' => $discolouration,
         'OpenApex' => $openApex,
-        'Carries' => $caries,
+        'Caries' => $caries,
         'Perforation' => $perforation,
         'Note' => $note,
         'Test' => [
-            'ToothNo' => getTesValue($tests['ToothNo']),
-            'Ept' => getTesValue($tests['Ept']),
-            'Heat' => getTesValue($tests['Heat']),
-            'Percussion' => getTesValue($tests['Percussion']),
-            'Palpation' => getTesValue($tests['Palpation']),
-            'ProbeDptLoc' => getTesValue($tests['ProbeDptLoc']),
-            'Mobility' => getTesValue($tests['Mobility']),
-            'SpecialTests' => getTesValue($tests['SpecialTests'])
+            'ToothNo' => getTestValue($tests['ToothNo']),
+            'Ept' => getTestValue($tests['Ept']),
+            'Heat' => getTestValue($tests['Heat']),
+            'Percussion' => getTestValue($tests['Percussion']),
+            'Palpation' => getTestValue($tests['Palpation']),
+            'ProbeDptLoc' => getTestValue($tests['ProbeDptLoc']),
+            'Mobility' => getTestValue($tests['Mobility']),
+            'SpecialTests' => getTestValue($tests['SpecialTests'])
         ]
     ];
 }
@@ -251,14 +250,14 @@ function getProgressNotes()
 function editPatientNotes()
 {
     $editNote = getRequestData('edit', 'string', 'post');
-    logMessage($editNote);
     if ($editNote === 'editNote') {
         $progressNotes = getProgressNotes();
         $fileNumber = getRequestData('FileNumber');
+        $firebaseId = getRequestData('FirebaseId');
         $name = getRequestData('PatientName');
         $phoneNo = getRequestData('PatientNo');
         $dateOfBirth = getRequestData('DOB');
-        $result = addPatientToDatabase($fileNumber, $name, $phoneNo, $dateOfBirth, $progressNotes);
+        $result = editPatientInDatabase($fileNumber, $name, $phoneNo, $dateOfBirth, $firebaseId, $progressNotes);
         if ($result['result']) {
             $result['message'] = LIST_PATIENT; // redirect do patient-list
         }

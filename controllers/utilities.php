@@ -184,7 +184,10 @@ function getNiceDate($dateFromFireStore, $dateFormat = 'M t, Y')
             return getDefaultDate($dateFormat);
         }
         $dateObject = date_create($dateFromFireStore);
-        return $dateObject->format($dateFormat);
+        if ($dateObject){
+            return $dateObject->format($dateFormat);
+        }
+        return getDefaultDate($dateFormat);
     } catch (Exception $exception) {
         logMessage($exception->getMessage());
         // set to current date instead

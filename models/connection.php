@@ -214,6 +214,9 @@ function setAppointmentId($appointmentObject)
 
 function sortArray($a, $b)
 {
+    if (!isset($a['AppointmentId'], $b['AppointmentId'])) {
+        return 0;
+    }
     $idA = (int)$a['AppointmentId'];
     $idB = (int)$b['AppointmentId'];
     if ($idA == $idB) return 0;
@@ -276,6 +279,7 @@ function getAppointmentObject(array $values)
     ];
     $app = setObject($keys, $values);
     $app['ProgressNotes'] = getProgressNoteObject($values);
+
     return $app;
 }
 
@@ -292,7 +296,7 @@ function getProgressNoteObject(array $values)
         'Crown',
         'Discolouration',
         'OpenApex',
-        'Carries',
+        'Caries',
         'Perforation',
         'Note',
         // 'Test'
@@ -302,7 +306,7 @@ function getProgressNoteObject(array $values)
         return [];
     }
     $note = setObject($keys, $not);
-    $note['Test'] = getTestObject($values);
+    $note['Test'] = getTestObject($values['ProgressNotes']);
     return $note;
 }
 
@@ -364,7 +368,7 @@ function getObjectValue($key, array $values)
     return $object;
 }
 
-function getTesValue(array $values)
+function getTestValue(array $values)
 {
     $obj = [];
     foreach ($values as $value) {

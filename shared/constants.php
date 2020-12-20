@@ -20,7 +20,7 @@ define('NAV_BAR', DOC_ROOT . '/shared/navbar.php');
 /* Definitions for navbar links*/
 /** HOME needs to be changed to whatever yours is, if it is an online domain change it to "/"  */
 define('HOME', 'http://localhost:8888/FREELANCER/hero-dentist/');
-// define('HOME', 'https://hero.bescharityfoundation.org/');
+// define('HOME', 'https://dental-hero.eripplesolutions.com/');
 define('BASE', HOME);
 define('SIGN_IN', HOME . 'views/users/signin.php');
 define('SIGN_UP', HOME . 'views/users/signup.php');

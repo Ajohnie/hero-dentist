@@ -19,23 +19,25 @@
         <div class="col-10" id="data-panel">
             <div class="container">
                 <div class="row form-container">
-                    <div class="col-12 py-4">
-                        <div class="form-row">
-                            <div class="form-group col-3">
-                                <label>Dentist</label>
-                                <select class="form-control">
-                                    <option>All-Dentists</option>
-                                </select>
-                            </div>
-                            <div class="form-groupcol-3">
-                                <label>Date</label>
-                                <input type="date" class="form-control"/>
-                            </div>
-                            <div class="form-group d-flex align-items-end col-3">
-                                <button type="submit" class="btn btn-sm btn-secondary mb-1 ml-2">Filter</button>
+                    <form onsubmit="showAppointmentSchedule()">
+                        <div class="col-12 py-4">
+                            <div class="form-row">
+                                <div class="form-group col-4">
+                                    <label>Dentist</label>
+                                    <select class="form-control" id="dentistSelect" onchange="filterAppointmentsByDentist(event)">
+                                        <option value="">All Dentists</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-5">
+                                    <label>Date</label>
+                                    <input type="date" class="form-control" id="appointmentDate"/>
+                                </div>
+                                <div class="form-group d-flex align-items-end col-3">
+                                    <button type="submit" class="btn btn-sm btn-secondary mb-1 ml-2">Filter</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
                 <div class="row form-container">
                     <div class="col-12">
@@ -45,7 +47,8 @@
                                 $month = isset($_REQUEST['month']) ? $_REQUEST['month'] : date('m');
                                 $year = isset($_REQUEST['year']) ? $_REQUEST['year'] : date('Y');
                                 $day = isset($_REQUEST['day']) ? $_REQUEST['day'] : date('j');
-                                $timestamp = strtotime($year . '-' . $month . '-' . $day);
+                                $dateString = $year . '-' . $month . '-' . $day;
+                                $timestamp = strtotime($dateString);
 
                                 $_date = strftime('%B,%d %Y', $timestamp);
                                 $prev_day = explode('-', date('Y-m-j', strtotime("-1 days", $timestamp)));
@@ -53,7 +56,8 @@
                                 ?>
                                 <a href="add-appointment.php?year=<?php echo $prev_day[0]; ?>&month=<?php echo $prev_day[1]; ?>&day=<?php echo $prev_day[2]; ?>"><span
                                             class="fa fa-chevron-left"></span></a>
-                                <h5 class="d-inline"><?php echo $_date; ?></h5>
+                                <h5 class="d-inline" id="searchDate"
+                                    date="<?= $dateString ?>"><?php echo $_date; ?></h5>
                                 <a href="add-appointment.php?year=<?php echo $next_day[0]; ?>&month=<?php echo $next_day[1]; ?>&day=<?php echo $next_day[2]; ?>"><span
                                             class="fa fa-chevron-right"></span></a>
                             </div>
