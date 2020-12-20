@@ -212,7 +212,7 @@ function dateIsCorrupted($dateFromFireStore)
  * @param $dateFormat
  * @return string
  */
-function getDefaultDate($dateFormat = 'Y-m-t')
+function getDefaultDate($dateFormat = 'Y-m-d')
 {
     return (new DateTime('now'))->format($dateFormat);
 }
