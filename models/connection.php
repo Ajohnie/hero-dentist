@@ -21,7 +21,7 @@ define('FIREBASE_CONFIG', array(
 ));
 
 define('USERS_COLLECTION', 'Admin');
-define('PATIENTS_COLLECTION', 'Appointment');
+define('PATIENTS_COLLECTION', 'Patient');
 define('APPOINTMENTS_COLLECTION', 'Appointment');
 define('DENTISTS_COLLECTION', 'Dentist');
 
@@ -204,22 +204,43 @@ function setAppointmentId($appointmentObject)
         return $appointmentObject;
     }
     $appointments = getRecords(APPOINTMENTS_COLLECTION, []);
+    if (count($appointments) === 0) {
+        $appointmentObject['AppointmentId'] = 1;
+        return $appointmentObject;
+    }
+    // filter appointments and remove any illegal values
+    $appointments = array_filter($appointments, static function ($appointment) {
+        return isset($appointment['AppointmentId']);
+    });
     // sort in descending order with the latest at the top
-    uksort($appointments, 'sortArray');
-    $lastAppointment = $appointments[0];
+    usort($appointments, static function ($arrayKeyA, $arrayKeyB) use ($appointments) {
+        return sortArray($arrayKeyA, $arrayKeyB);
+    });
+    $lastAppointment = $appointments[count($appointments) - 1];
     $lastId = $lastAppointment['AppointmentId'];
-    $appointmentObject['AppointmentId'] = ((int)$lastId) + 1;
+    $newId = (((int)$lastId) + 1);
+    $appointmentObject['AppointmentId'] = $newId;
     return $appointmentObject;
 }
 
 function sortArray($a, $b)
 {
-    if (!isset($a['AppointmentId'], $b['AppointmentId'])) {
+    if (isset($a['AppointmentId'], $b['AppointmentId'])) {
+        $idA = (int)$a['AppointmentId'];
+        $idB = (int)$b['AppointmentId'];
+        return sortNumbers($idA, $idB);
+    }
+    // $a and $b are numbers
+    return sortNumbers($a, $b);
+}
+
+function sortNumbers($a, $b)
+{
+    $idA = (int)$a;
+    $idB = (int)$b;
+    if ($idA == $idB) {
         return 0;
     }
-    $idA = (int)$a['AppointmentId'];
-    $idB = (int)$b['AppointmentId'];
-    if ($idA == $idB) return 0;
     return ($idA < $idB) ? -1 : 1;
 }
 
@@ -381,4 +402,21 @@ function getTestValue(array $values)
         }
     }
     return $obj;
+}
+
+/**get patients existing in the database
+ * filters:- name, PatientNo, AppID
+ * @param array $filters
+ * @param bool $allPatients
+ * @param bool $getOne
+ * @return array
+ */
+function getPatientInfo($filters = [], $allPatients = false, $getOne = false)
+{
+    $patients = getRecords(PATIENTS_COLLECTION, $filters, $getOne);
+    if ($allPatients || $getOne) {
+        return $patients;
+    }
+    // remove duplicates since patients collection is same as appointments collection
+    return array_unique($patients, SORT_REGULAR);
 }

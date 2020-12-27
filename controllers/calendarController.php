@@ -6,7 +6,7 @@ include 'utilities.php';
 include CALENDAR_MODEL;
 
 /** call all methods so that Ajax calls can locate them */
-
+renderAjaxCalendar();
 
 /** filter passed appointments and
  * show only for today
@@ -52,21 +52,51 @@ function showTodayAppointments()
     return null;
 }
 
+/** receives ajax calls to filter calendar appointments and then render a modified calendar*/
+function renderAjaxCalendar()
+{
+    $dentist = getRequestData('calendarDentist');
+    $calendarMonthSelect = getRequestData('calendarMonthSelect');
+    if ($dentist || $calendarMonthSelect) {
+        showCalendar($dentist, $calendarMonthSelect);
+    }
+}
+
 /** show calendar with appointments
+ * @param null|string $dentist
+ * @param null|string $calendarMonth
  * @return null
  */
-function showCalendar()
+function showCalendar($dentist = null, $calendarMonth = null)
 {
-    $month = isset($_REQUEST['month']) ? $_REQUEST['month'] : date('m');
-    $year = isset($_REQUEST['year']) ? $_REQUEST['year'] : date('Y');
+    $month = getRequestData('month');
+    if (!$month) {
+        $month = date('m');
+    }
+    $year = getRequestData('year');
+    if (!$year) {
+        $year = date('Y');
+    }
     $days = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-
-    $appointmentDates = getAppointmentDates();
+    $navigatorHtml = null;
+    if ($calendarMonth) {
+        $getMonthIndex = array_search($calendarMonth, MONTHS);
+        if ($getMonthIndex !== false) {
+            // in MONTHS array, months are listed in ascending order beginning from index 0
+            // so add 1 to get month as a digit
+            $month = $getMonthIndex + 1;
+        }
+    }
+    if ($calendarMonth || $dentist) {
+        $navigatorHtml = getCalendarNavigator($month, $year);
+    }
+    $appointmentDates = getAppointmentDates($dentist);
+    $tableRows = '';
     for ($i = 1; $i <= $days;) {
-        echo '<tr>';
+        $tableRows .= '<tr>';
         for ($k = 0; $k < 7; $k++) {
             if ($i > $days) {
-                echo '<td></td>';
+                $tableRows .= '<td></td>';
                 continue;
             }
             $cell_date = $year . '-' . $month . '-' . $i;
@@ -75,24 +105,31 @@ function showCalendar()
             if ($day_index == $k) {
                 $indices = checkInArray($appointmentDates, $cell_date);
                 if ($indices !== false) {
-                    echo '<td>';
-                    echo '<span class="calendarBadge">' . $i . '</span>';
+                    $tableRows .= '<td>';
+                    $tableRows .= '<span class="calendarBadge">' . $i . '</span>';
                     foreach ($indices as $index) {
                         foreach ($appointmentDates[$index] as $appointment) {
                             // use class calenderBadge in ajax call
-                            echo '<span class="badge badge-primary calendarBadge" data-toggle="usedAjaxInstead" data-target="usingAjaxInstead" FirebaseId="' . $appointment['FirebaseId'] . '">' . $appointment['time'] . ' ' . $appointment['dentist'] . '</span>';
+                            $tableRows .= '<span class="badge badge-primary calendarBadge" data-toggle="usedAjaxInstead" data-target="usingAjaxInstead" FirebaseId="' . $appointment['FirebaseId'] . '">' . $appointment['time'] . ' ' . $appointment['dentist'] . '</span>';
                         }
                     }
-                    echo '</td>';
+                    $tableRows .= '</td>';
                 } else {
-                    echo '<td>' . $i . '</td>';
+                    $tableRows .= '<td>' . $i . '</td>';
                 }
                 $i++;
             } else {
-                echo '<td></td>';
+                $tableRows .= '<td></td>';
             }
         }
-        echo '</tr>';
+        $tableRows .= '</tr>';
+    }
+    if ($navigatorHtml) {
+        // request was sent via ajax so, encode navigator html too
+        echo json_encode(['navigatorHtml' => $navigatorHtml, 'tableRows' => $tableRows]);
+    } else {
+        // user just visited calendar.php so out put raw html
+        echo $tableRows;
     }
     return null;
 }
@@ -112,34 +149,51 @@ function checkInArray($appointments, $cellDate)
 }
 
 /** show calendar navigator with arrows
- * @return null
+ * @return string|void
  */
 function showCalendarNavigator()
 {
-    $month = isset($_REQUEST['month']) ? $_REQUEST['month'] : date('m');
-    $year = isset($_REQUEST['year']) ? $_REQUEST['year'] : date('Y');
+    echo getCalendarNavigator();
+}
+
+/** get calendar navigator with arrows
+ * @param null $month
+ * @param null $year
+ * @return string|void
+ */
+function getCalendarNavigator($month = null, $year = null)
+{
+    $month = !$month ? getRequestData('month') : $month;
+    if (!$month) {
+        $month = date('m');
+    }
+    $year = !$year ? getRequestData('year') : $year;
+    if (!$year) {
+        $year = date('Y');
+    }
     $month_start = strtotime($year . '-' . $month . '-1');
     $prev_month = explode('-', date('Y-m', strtotime("-1 months", $month_start)));
     $next_month = explode('-', date('Y-m', strtotime("+1 months", $month_start)));
-    echo '<a href="calendar.php?year=' . $prev_month[0] . '&month=' . $prev_month[1] . '"><span class="fa fa-chevron-left"></span></a>';
-    echo date('F', $month_start);
-    echo '<a href="calendar.php?year=' . $next_month[0] . '&month=' . $next_month[1] . '"><span class="fa fa-chevron-right"></span></a>';
+    $html = '<a href="calendar.php?year=' . $prev_month[0] . '&month=' . $prev_month[1] . '" id="monthLeft"><span class="fa fa-chevron-left"></span></a>';
+    $html .= '<span id="monthName" style="text-transform: capitalize">' . date('F', $month_start) . '</span>';
+    $html .= '<a href="calendar.php?year=' . $next_month[0] . '&month=' . $next_month[1] . '" id="monthRight"><span class="fa fa-chevron-right"></span></a>';
+    return $html;
 }
 
 function showDentistSelect()
 {
     $dentists = getDentists();
-    echo '<option>All Dentists</option>';
+    echo '<option value="">All Dentists</option>';
     foreach ($dentists as $dentist) {
-        echo "<option>" . $dentist['name'] . "</option>";
+        echo "<option value='" . $dentist['name'] . "'>" . $dentist['name'] . "</option>";
     }
 }
 
 function showMonthSelect()
 {
-    echo '<option>Select Month</option>';
+    echo '<option value="">Select Month</option>';
     $months = MONTHS;
     foreach ($months as $month) {
-        echo "<option>" . $month . "</option>";
+        echo "<option value='" . $month . "'>" . $month . "</option>";
     }
 }

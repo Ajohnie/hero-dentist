@@ -10,6 +10,7 @@ addDentist();
 editDentist();
 deleteDentist();
 viewDentists();
+showDentistSelect();
 
 /**add dentist to the database
  * @return null
@@ -115,4 +116,18 @@ function viewDentists()
         echo json_encode($rows);
     }
     return null;
+}
+
+function showDentistSelect()
+{
+    $viewDentist = getRequestData('viewDentist', 'string', 'post');
+    if ($viewDentist) {
+        $dentists = getDentists();
+        $options = '<option value="">All Dentists</option>';
+        foreach ($dentists as $dentist) {
+            $name = $dentist['name'];
+            $options .= "<option value='$name'>" . $name . "</option>";
+        }
+        echo $options;
+    }
 }

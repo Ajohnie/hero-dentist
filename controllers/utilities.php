@@ -171,7 +171,7 @@ function isFileNumberValid($fileNumber)
  * @param string $dateFormat
  * @return string
  */
-function getNiceDate($dateFromFireStore, $dateFormat = 'M t, Y')
+function getNiceDate($dateFromFireStore, $dateFormat = 'M d, Y')
 {
     if (!isset($dateFromFireStore) || !is_string($dateFromFireStore)) {
         // set to current date instead
@@ -184,7 +184,7 @@ function getNiceDate($dateFromFireStore, $dateFormat = 'M t, Y')
             return getDefaultDate($dateFormat);
         }
         $dateObject = date_create($dateFromFireStore);
-        if ($dateObject){
+        if ($dateObject) {
             return $dateObject->format($dateFormat);
         }
         return getDefaultDate($dateFormat);
@@ -209,12 +209,18 @@ function dateIsCorrupted($dateFromFireStore)
 }
 
 /** return defaultDate
- * @param $dateFormat
+ * @param string $dateFormat
+ * @param bool $getTime
  * @return string
  */
-function getDefaultDate($dateFormat = 'Y-m-d')
+function getDefaultDate($dateFormat = 'Y-m-d', $getTime = false)
 {
-    return (new DateTime('now'))->format($dateFormat);
+    date_default_timezone_set(DEFAULT_TIME_ZONE);
+    $date = new  DateTime();
+    if ($getTime) {
+        return strtoupper($date->format('ga'));
+    }
+    return $date->format($dateFormat);
 }
 
 /** return sanitized associative array

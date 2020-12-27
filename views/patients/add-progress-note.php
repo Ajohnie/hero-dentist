@@ -34,6 +34,9 @@
         width: 7rem;
         margin-left: 0.2rem
     }
+    .add-note-btn{
+        font-weight: 900;
+    }
 </style>
 <div class="container-fluid" id="dashboard-wrapper">
     <div class="row">
@@ -43,41 +46,73 @@
         <div class="col-10" id="data-panel">
             <div class="container">
                 <div class="row mt-4 mb-3">
-                    <div class="col-12">
+                    <div class="col-9">
                         <h4><span id="title">Add</span> Progress Note</h4>
                     </div>
+                    <?php if (isset($editDentist)): ?>
+                        <div class="col-3">
+                            <div class="form-row">
+                                <input type="submit" value="Add New Note" id="addNote" name="addNote"
+                                       class="btn btn-sm w-100 btn-light add-note-btn">
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div class="row" id="form-container">
-                    <form action="<?= PATIENTS_CONTROLLER ?>" id="theForm" class="w-100"
-                          formFields="FileNumber,PatientName,PatientNo,DOB,FirebaseId,Restoration,Crown,Discolouration,OpenApex,Caries,Perforation,Note">
+                    <form action="<?= PATIENTS_CONTROLLER ?>"
+                          id="theForm" class="w-100"
+                          formFields="FileNumber,PatientName,DentistName,PatientNo,DOB,FirebaseId,Restoration,Crown,Discolouration,OpenApex,Caries,Perforation,Note">
                         <?php include FIREBASE_ID_INPUT ?>
-                        <div class="row justify-content-center">
-                            <div class="col-2">
-                                <div class="form-group">
-                                    <label class="row">File Number</label>
-                                    <input type="text" name="FileNumber" id="FileNumber" class="form-control row"
-                                           required>
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="row">File Number</label>
+                                        <input type="text" name="FileNumber" id="FileNumber" class="form-control row"
+                                               required>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-3">
-                                <div class="form-group">
-                                    <label class="row">Name</label>
-                                    <input type="text" name="PatientName" id="PatientName" class="form-control row"
-                                           required>
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="row">Name</label>
+                                        <input type="text" name="PatientName" id="PatientName" class="form-control row"
+                                               required readonly>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-3 mr-1">
-                                <div class="form-group row">
-                                    <label class="col-3">Phone</label>
-                                    <input type="number" id="PatientNo" name="PatientNo" class="form-control" required>
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="col-3">Phone</label>
+                                        <input readonly type="number" id="PatientNo" name="PatientNo"
+                                               class="form-control"
+                                               required>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-3">
-                                <div class="form-group row">
-                                    <label class="col-12">Date of Birth</label>
-                                    <input type="date" name="DOB" id="DOB"
-                                           class="form-control" required>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label class="col-12">Date of Birth</label>
+                                        <input type="date" name="DOB" id="DOB"
+                                               class="form-control" required>
+                                    </div>
                                 </div>
+                                <?php if (isset($editDentist)): ?>
+                                    <div class="col-2">
+                                        <div class="form-group">
+                                            <label class="row">Dentist</label>
+                                            <input type="text" name="DentistName" id="DentistName"
+                                                   class="form-control row"
+                                                   required readonly>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (!isset($editDentist)): ?>
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <label>Select Dentist</label>
+                                            <!-- will populated from javascript showDentistList function-->
+                                            <select required class="form-control" name="DentistName" id="DentistName"></select>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="row justify-content-center">
@@ -241,5 +276,9 @@
     </div>
 </div>
 <?php include JS ?>
+<script>
+    // fill dentist selection list
+    showDentistList();
+</script>
 </body>
 </html>

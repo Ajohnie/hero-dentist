@@ -129,14 +129,14 @@ function viewAppointments()
 function viewAppointmentSchedule()
 {
     $viewAppointment = getRequestData('view', 'string', 'post');
-    // make sure request is for appointment schedule
+    // make sure request is for patient schedule
     if ($viewAppointment === 'schedule') {
 
         $year = getRequestData('year');
         $month = getRequestData('month');
         $day = getRequestData('day');
         $query = null;
-        // this is set by the date filter on add-appointment.php and sent via ajax
+        // this is set by the date filter on add-patient.php and sent via ajax
         $appointmentDate = getRequestData('AppointmentDate');
         $searchDate = getRequestData('searchDate');
         if ($appointmentDate) {
@@ -169,14 +169,14 @@ function viewAppointmentSchedule()
     if ($viewAppointment === 'showAppointment') {
         $firebaseId = getRequestData('FirebaseId', 'string', 'post');
         //get PatientName, AppointmentDate, PatientNo
-        $appointment = getAppointments(['param' => 'FirebaseId', 'operator' => '==', 'value' => $firebaseId], true);
+        $patient = getAppointments(['param' => 'FirebaseId', 'operator' => '==', 'value' => $firebaseId], true);
 
         echo json_encode([
-            'PatientName' => $appointment['PatientName'],
-            'DentistName' => $appointment['DentistName'],
-            'AppointmentDate' => $appointment['AppointmentDate'],
-            'AppointmentTime' => $appointment['AppointmentTime'],
-            'PatientNo' => $appointment['PatientNo'],
+            'PatientName' => $patient['PatientName'],
+            'DentistName' => $patient['DentistName'],
+            'AppointmentDate' => $patient['AppointmentDate'],
+            'AppointmentTime' => $patient['AppointmentTime'],
+            'PatientNo' => $patient['PatientNo'],
         ]);
     }
     if ($viewAppointment === 'addAppointment') {
@@ -188,16 +188,18 @@ function viewAppointmentSchedule()
         if (!$date) {
             $date = getDefaultDate();
         }
-        $appointment = getAppointments(['param' => 'PatientNo', 'operator' => '==', 'value' => $phoneNo], true);
-        if (count($appointment) > 0) {
-            $patientName = $appointment['PatientName'];
-        } else {
-            $patientName = 'New Patient';
-        }
 
-        $result = addAppointmentToDatabase($dentistName, $patientName, $phoneNo, $date, $time);
-        if ($result['result']) {
-            $result['message'] = LIST_APPOINTMENT; // redirect do appointment-list
+        $patient = getPatientInfo(['param' => 'PatientNo', 'operator' => '==', 'value' => $phoneNo], false, true);
+
+        if (count($patient) > 0) {
+            $patientName = $patient['PatientName'];
+            $result = addAppointmentToDatabase($dentistName, $patientName, $phoneNo, $date, $time);
+            if ($result['result']) {
+                $result['message'] = LIST_APPOINTMENT; // redirect do patient-list
+            }
+        } else {
+            $result['message'] = 'Patient Not Found !, Add the Patient First !';
+            $result['result'] = false;
         }
         echo json_encode($result);
     }

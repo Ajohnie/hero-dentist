@@ -137,7 +137,8 @@ function getAppointments($filters = [], $getOne = false)
     if ($getOne) {
         return $appointments;
     }
-    // remove duplicates since appointments collection is same as appointments collection
+
+    // remove duplicates
     return array_unique($appointments, SORT_REGULAR);
 }
 
@@ -303,13 +304,19 @@ function searchCallback($appointment, $slot, $dentist)
 }
 
 /** group appointments by date
+ * @param $dentist
  * @return array
  */
-function getAppointmentDates()
+function getAppointmentDates($dentist = null)
 {
 
     $appointmentDates = [];
-    $appointments = getAppointments();
+    if (!$dentist || $dentist === "") {
+        $query = [];
+    } else {
+        $query = ['param' => 'DentistName', 'operator' => '==', 'value' => $dentist];
+    }
+    $appointments = getAppointments($query);
     foreach ($appointments as $appointment) {
         $key = $appointment['AppointmentDate'];
         $time = $appointment['AppointmentTime'];

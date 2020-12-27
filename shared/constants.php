@@ -5,6 +5,9 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+define('DEFAULT_TIME_ZONE', 'Africa/Kampala');
+// define('DEFAULT_TIME_ZONE', 'Asia/Riyadh');
 /* set root directory*/
 define('DOC_ROOT', dirname(__FILE__, 2));
 
@@ -53,6 +56,7 @@ define('ADD_PATIENT', HOME . 'views/patients/add-patient.php');
 define('LIST_PATIENT', HOME . 'views/patients/patient-list.php');
 define('LIST_PROGRESS_NOTE', HOME . 'views/patients/progress-note-list.php');
 define('ADD_PROGRESS_NOTE', HOME . 'views/patients/add-progress-note.php');
+define('EDIT_PROGRESS_NOTE', HOME . 'views/patients/edit-progress-note.php');
 
 define('APPOINTMENT_IMAGE_URL', BASE . 'assets/icons/appointment.svg');
 define('ADD_APPOINTMENT', HOME . 'views/appointments/add-appointment.php');

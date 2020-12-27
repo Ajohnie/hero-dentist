@@ -1,4 +1,4 @@
-<div id="alertDialog" title="Alert !" style="text-align: center">
+<div id="alertDialog" title="Alert !" style="text-align: center;">
 </div>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
@@ -24,7 +24,12 @@
 
     function showAlert(msg) {
         $(function () {
-            $("#alertDialog").html(msg).dialog();
+            const isAppointmentModalShowing = $("#addAppointmentModal").is(":visible");
+            if (isAppointmentModalShowing) {
+                alert(msg);
+            } else {
+                $("#alertDialog").html(msg).dialog();
+            }
         });
     }
 
@@ -95,14 +100,48 @@
         }
     }
 
+    function setAddNoteButton(data) {
+        // activate add note button if it is available
+        const addNoteButton = document.getElementById('addNote');
+        if (addNoteButton) {
+            // this url is set in the controller in the view functions
+            // when encoding rowData
+            let rowData;
+            if (data.rowData) {
+                // this function was called from getStoredTableList
+                rowData = data.rowData
+            } else {
+                // this function was called from FillFormWithCachedData
+                rowData = data;
+            }
+            let addNoteUrl;
+
+            if (rowData['addNoteUrl']) {
+                addNoteUrl = rowData['addNoteUrl'];
+            } else {
+                try {
+                    addNoteUrl = JSON.parse(rowData)['addNoteUrl'];
+                } catch (e) {
+                    logError(e);
+                }
+            }
+            if (addNoteUrl) {
+                addNoteButton.onclick = () => {
+                    window.location = addNoteUrl;
+                };
+            }
+        }
+    }
+
     /** populates tables with html from controllers
      * It works for all tables so the html is determined by the view action of the controllers
      * it is called when the body loads*/
     function getTableListData() {
         const routeIsCalender = window.location.href.indexOf('calendar') > -1;
         const routeIsAdd = window.location.href.indexOf('add') > -1;
+        const routeIsEditNote = window.location.href.indexOf('edit-progress-note') > -1;
         // add-note is filtered out too
-        if (routeIsAdd || routeIsCalender) {
+        if (routeIsAdd || routeIsCalender || routeIsEditNote) {
             return;
         }
         if (!controllerUrl) {
@@ -118,6 +157,7 @@
             // this is the patient object that will be used to find Notes
             data['rowData'] = JSON.stringify(getStoredTableRowData());
         }
+        setAddNoteButton(data);
         const callback = (response) => {
             try {
                 const results = JSON.parse(response);
@@ -188,14 +228,17 @@
             saveMode = 'add';
         }
         /** add capacity to process add note form */
-        const routeIsViewNote = window.location.href.indexOf('note') > -1;
+        const routeIsEditNote = window.location.href.indexOf('edit-progress-note') > -1;
+        const routeIsAddNote = window.location.href.indexOf('add-progress-note') > -1;
         let mode = saveMode;
-        if (routeIsViewNote) {
-            if (saveMode === 'add') {
-                mode = 'addNote';
-            } else {
-                mode = 'editNote';
-            }
+        if (routeIsEditNote) {
+            saveMode = 'edit';
+            mode = 'editNote';
+            formData['Tests'] = extractDiagnosisTests();
+        }
+        if (routeIsAddNote) {
+            saveMode = 'add';
+            mode = 'addNote';
             formData['Tests'] = extractDiagnosisTests();
         }
         formData[saveMode] = mode; // set when filling the form
@@ -276,13 +319,17 @@
             // form is being opened in add mode so ignore
             return;
         }
+        setAddNoteButton(formData);
         // get form field ids specified by formFields attribute attached to forms
         const fields = editingForm.attr('formFields');
         if (!fields) {
             return;
         }
         // change title of the page
-        $('#title').html('Edit');
+        const routeIsAddNote = window.location.href.indexOf('add-progress-note') > -1;
+        if (!routeIsAddNote) {
+            $('#title').html('Edit');
+        }
 
         // mark the form for editing
         editingForm.attr('saveMode', 'edit');
@@ -349,7 +396,9 @@
             if (!row) {
                 continue;
             }
-
+            if (!diagnoseTests) {
+                continue;
+            }
             // formData is now test
             const tests = diagnoseTests[rowName];
             if (!tests) {
@@ -699,5 +748,25 @@
             }
         }
         makeAjaxRequest(url, {view: 'showAppointment', FirebaseId: FirebaseId}, showDetailsCallback);
+    }
+
+    function showDentistList() {
+        const url = '<?= DENTISTS_CONTROLLER ?>';
+        if (!url) {
+            return;
+        }
+        const showDentistCallback = (response) => {
+            if (!response) {
+                return;
+            }
+            try {
+                if (response) {
+                    $("#DentistName").html(response);
+                }
+            } catch (e) {
+                logError(e);
+            }
+        }
+        makeAjaxRequest(url, {viewDentist: 'viewDentist'}, showDentistCallback);
     }
 </script>

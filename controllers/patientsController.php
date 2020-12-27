@@ -108,12 +108,11 @@ function viewPatients()
                 }
             }
             // set supported date format for date input(yyyy-mm-dd)
-            $patientData['DOB'] = getNiceDate($dob, 'Y-m-t');
+            $patientData['DOB'] = getNiceDate($dob, 'Y-m-d');
 
             // set value for date column to format Dec 31, 2021
             $dob = getNiceDate($dob);
 
-            $rowData = json_encode($patientData);
             $rowId = $patientData['FirebaseId'];
 
             // set parameters for ajax calls
@@ -121,17 +120,23 @@ function viewPatients()
             $nextUrl = ADD_PATIENT;
             $viewNoteUrl = LIST_PROGRESS_NOTE;
             $addNoteUrl = ADD_PROGRESS_NOTE;
+            $patientData['addNoteUrl'] = $addNoteUrl;
+            $rowData = json_encode($patientData);
             $editAction = 'storeTableRowData(' . $rowData . ',"' . $nextUrl . '")';
             $deleteAction = 'deleteTableRowData("' . $rowId . '","' . $deleteActionUrl . '")';
             $viewNoteAction = 'storeTableRowData(' . $rowData . ',"' . $viewNoteUrl . '")';
             $addNoteAction = 'storeTableRowData(' . $rowData . ',"' . $addNoteUrl . '")';
 
+            // removed logic that conditionally shows view link
+            // patient Notes will be queried in viewPatientNotes()
+            // so show the view link anyway
+            $progressNoteAvailable = '';
             // show user if progress note has been set
-            if (isset($patientData['ProgressNotes']) && count($patientData['ProgressNotes'])) {
+            /*if (isset($patientData['ProgressNotes']) && count($patientData['ProgressNotes'])) {
                 $progressNoteAvailable = ''; // there are no notes, remove view link
             } else {
                 $progressNoteAvailable = 'display:none';
-            }
+            }*/
 
             $tableRows .= "<tr><td>" . $fileNumber . "</td>
                     <td>" . $name . "</td>
@@ -167,19 +172,21 @@ function viewPatientNotes()
         $notes = getPatientNotes($patientData);
         $tableRows = '';
         foreach ($notes as $note) {
-            $rowData = json_encode($note);
             $rowId = $note['FirebaseId'];
 
             // set parameters for ajax calls
             $deleteActionUrl = PATIENTS_CONTROLLER;
-            $nextUrl = ADD_PROGRESS_NOTE;
+            $nextUrl = EDIT_PROGRESS_NOTE;
+            $addNoteUrl = ADD_PROGRESS_NOTE;
+            $note['addNoteUrl'] = $addNoteUrl;
+            $rowData = json_encode($note);
             $editAction = 'storeTableRowData(' . $rowData . ',"' . $nextUrl . '")';
             $deleteAction = 'deleteTableRowData("' . $rowId . '","' . $deleteActionUrl . '")';
-            $tableRows = '';
 
             $tableRows .= "<tr><td>" . $note['PatientName'] . "</td>
                     <td>" . $note['DentistName'] . "</td>
                     <td>" . $note['Date'] . "</td>
+                    <td>" . $note['AppointmentTime'] . "</td>
                     <td>" . $note['Note'] . "</td>
                      <td><span class='fa fa-pencil-square-o text-success' id='edit' onclick='$editAction'></span>
                        <span class='fa fa-remove text-danger' id='delete' onclick='$deleteAction'></span>
@@ -204,7 +211,8 @@ function addPatientNotes()
         $name = getRequestData('PatientName');
         $phoneNo = getRequestData('PatientNo');
         $dateOfBirth = getRequestData('DOB');
-        $result = addPatientToDatabase($fileNumber, $name, $phoneNo, $dateOfBirth, $progressNotes);
+        $dentist = json_decode(getRequestData('DentistName'), false)[0];
+        $result = addPatientNotesToDatabase($fileNumber, $name, $phoneNo, $dateOfBirth, $progressNotes, $dentist);
         if ($result['result']) {
             $result['message'] = LIST_PATIENT; // redirect do patient-list
         }
@@ -257,7 +265,7 @@ function editPatientNotes()
         $name = getRequestData('PatientName');
         $phoneNo = getRequestData('PatientNo');
         $dateOfBirth = getRequestData('DOB');
-        $result = editPatientInDatabase($fileNumber, $name, $phoneNo, $dateOfBirth, $firebaseId, $progressNotes);
+        $result = editPatientNotesInDatabase($fileNumber, $name, $phoneNo, $dateOfBirth, $firebaseId, $progressNotes);
         if ($result['result']) {
             $result['message'] = LIST_PATIENT; // redirect do patient-list
         }
@@ -274,7 +282,7 @@ function deletePatientNote()
     $deleteNote = getRequestData('delete', 'string', 'post');
     if ($deleteNote === 'deleteNote') {
         $firebaseId = getRequestData('FirebaseId');
-        $result = deletePatientFromDatabase($firebaseId);
+        $result = deletePatientNotesFromDatabase($firebaseId);
         echo json_encode($result);
     }
     return null;

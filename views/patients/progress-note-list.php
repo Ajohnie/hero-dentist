@@ -29,7 +29,7 @@
                     </div>
                     <div class="col-3">
                         <div class="form-row">
-                            <input type="submit" value="Add New Note" name="addNote"
+                            <input type="submit" value="Add New Note" id="addNote" name="addNote"
                                    class="btn btn-sm w-100 btn-light add-note-btn">
                         </div>
                     </div>
@@ -45,6 +45,7 @@
                                         <th>Name</th>
                                         <th>Dentist</th>
                                         <th>Note Date</th>
+                                        <th>Note Time</th>
                                         <th>Note</th>
                                         <th>Action</th>
                                     </tr>

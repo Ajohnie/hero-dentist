@@ -42,7 +42,7 @@
                                                 <?php
                                                 // sample data
                                                 $dentist_list = array(
-                                                    "All Dentist",
+                                                    "All Dentists",
                                                 );
                                                 foreach ($dentist_list as $dentist) {
                                                     echo "<option>" . $dentist . "</option>";

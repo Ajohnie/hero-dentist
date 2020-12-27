@@ -52,33 +52,36 @@
             <div class="container bg-light" id="calendar-container">
                 <div class="row">
                     <div class="col-12">
-                        <div class="form-row">
-                            <div class="form-group col-4">
-                                <label>Select Dentist</label>
-                                <select class="form-control">
-                                    <?php showDentistSelect() ?>
-                                </select>
+                        <form action="<?= CALENDAR_CONTROLLER ?>" id="calendarForm">
+                            <div class="form-row">
+                                <div class="form-group col-4">
+                                    <label>Select Dentist</label>
+                                    <select class="form-control" name="calendarDentist" id="calendarDentist">
+                                        <?php showDentistSelect() ?>
+                                    </select>
+                                </div>
+                                <div class="form-group col-4">
+                                    <label>Select Month</label>
+                                    <select class="form-control" name="calendarMonthSelect" id="calendarMonthSelect">
+                                        <?php
+                                        showMonthSelect();
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="form-group-3 d-flex align-items-end">
+                                    <button class="btn btn-secondary mb-3">Filter</button>
+                                </div>
                             </div>
-                            <div class="form-group-3 d-flex align-items-end">
-                                <button class="btn btn-secondary mb-3">Filter</button>
-                            </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
                 <div class="row">
                     <div id="month-display" class="col-4 offset-4 d-flex">
-                        <h5 class="text-center">
+                        <h5 class="text-center" id="navigatorHtml">
                             <?php
                             showCalendarNavigator();
                             ?>
                         </h5>
-                    </div>
-                    <div class="col-4">
-                        <select class="form-control">
-                            <?php
-                            showMonthSelect();
-                            ?>
-                        </select>
                     </div>
                 </div>
                 <div class="row">
@@ -96,7 +99,7 @@
                                     <th>Sat</th>
                                 </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="calendarTable">
                                 <?php showCalendar(); ?>
                                 </tbody>
                             </table>
@@ -116,10 +119,36 @@
 <?php include JS ?>
 <script>
     let appointmentUrl = '<?php echo APPOINTMENTS_CONTROLLER ?>';
+    let calendarUrl = '<?php echo CALENDAR_CONTROLLER ?>';
     $('.calendarBadge').on('click', function () {
         const FirebaseId = event.target.getAttribute('FirebaseId');
         showAppointmentPopup(FirebaseId, appointmentUrl);
     });
+</script>
+<script>
+    $('#calendarForm').on('submit', function (event) {
+        event.preventDefault();
+        const dentist = document.getElementById('calendarDentist').value;
+        const month = document.getElementById('calendarMonthSelect').value;
+
+        function calendarCallback(response) {
+            if (response) {
+                const results = JSON.parse(response);
+                const navigatorHtml = document.getElementById('navigatorHtml');
+                const calendarTable = document.getElementById('calendarTable');
+                if (results.tableRows) {
+                    calendarTable.innerHTML = results.tableRows;
+                }
+                if (results.navigatorHtml) {
+                    navigatorHtml.innerHTML = results.navigatorHtml;
+                }
+            }
+        }
+
+        makeAjaxRequest(calendarUrl, {calendarDentist: dentist, calendarMonthSelect: month}, calendarCallback);
+    });
+    // fill dentist selection list
+    // showDentistList();
 </script>
 </body>
 
