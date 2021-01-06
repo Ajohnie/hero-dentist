@@ -35,7 +35,7 @@ Data validation occurs in 3 phases;
 Data is stored in Google Cloud Firestore and is synchronized with Google Alexa in the dental clinic.
 
 ## USE OF CONSTANTS
-Most of the variable are called using constants, except in a couple of cases where constants could not be used
+Most of the variables are called using constants, except in a couple of cases where constants could not be used
 due to namespace limitations (e.g in the case of loggedInUser). The constants enable replacing of certain files
 without need for making system wide changes. Also, they make testing the application easier. A test case for a
 file can be written and easily used by just pointing to the path to the test file.
