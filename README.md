@@ -39,3 +39,18 @@ Most of the variable are called using constants, except in a couple of cases whe
 due to namespace limitations (e.g in the case of loggedInUser). The constants enable replacing of certain files
 without need for making system wide changes. Also, they make testing the application easier. A test case for a
 file can be written and easily used by just pointing to the path to the test file.
+
+# INSTALLATION
+Running this app requires minimum php 7.4 due to dependency on google grpc extension
+Run "composer install" to install all composer dependencies.
+Install and enable grpc extension in your php extension
+ ->Follow this tutorial https://cloud.google.com/php/grpc
+ ->Download the grpc dll for your architecture here https://pecl.php.net/package/gRPC
+ ->You will need to try out several dll files until you find one that works
+
+# TODO
+Any and all improvements and suggestions are welcome
+
+# CREDITS
+Thanks to @Arwa for providing the idea and most of the UI design
+
